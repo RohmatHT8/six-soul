@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Livewire;
+
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Product;
+use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class Homepage extends Component
+{
+    use WithPagination;
+    #[Url]
+    public $selected_categories = [];
+    #[Url]
+    public $selected_brands = [];
+
+    #[Url]
+    public $searchTerm = '';
+
+    public function render()
+    {
+        $productQuery = Product::query()->where("is_active", 1);
+        $categories = Category::where('is_active', 1)->get();
+        $brands = Brand::where('is_active', 1)->get();
+
+        if (!empty($this->selected_categories)) {
+            $productQuery->whereIn("category_id", $this->selected_categories);
+        }
+
+        if (!empty($this->selected_brands)) {
+            $productQuery->whereIn("brand_id", $this->selected_brands);
+        }
+
+        if (!empty($this->searchTerm)) {
+            $productQuery->where("name", 'like', '%' . $this->searchTerm . '%');
+        }
+        
+        return view('livewire.homepage', [
+            'products' => $productQuery->paginate(8),
+            'categories' => $categories,
+            'brands' => $brands
+        ]);
+    }
+}

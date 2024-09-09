@@ -1,0 +1,13 @@
+/* resources/css/app.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#scrollContainer::-webkit-scrollbar {
+    display: none;
+}
+
+#scrollContainer {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
