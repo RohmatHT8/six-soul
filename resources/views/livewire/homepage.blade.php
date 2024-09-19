@@ -15,6 +15,27 @@
         <div class="w-10"></div>
     </nav>
     <div class="mb-10 lg:px-44 px-4 mt-20 relative" x-data="{ open: false }">
+        @if(count($selected_categories) > 0 || $price_range || $nicotine_range)
+        <div class="py-4">
+            <div class="py-2 px-5 bg-lime-200 rounded-lg text-sm font-semibold text-gray-700">
+                Filtered By
+                @if(count($selected_categories) > 0)
+                Category
+                @endif
+    
+                @if($price_range)
+                @if(count($selected_categories) > 0), @endif
+                Price
+                @endif
+    
+                @if($nicotine_range)
+                @if(count($selected_categories) > 0 || $price_range), @endif
+                Nicotine
+                @endif
+            </div>
+        </div>
+        @endif
+
         <!-- Button Filter -->
         <div @click="open = true">
             <svg class="w-6 h-6 fixed z-50 top-6 right-5 md:right-10 text-gray-400 hover:text-gray-500 cursor-pointer dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -29,7 +50,7 @@
             x-transition.opacity>
 
             <!-- Sidebar Filter -->
-            <div class="bg-white w-64 h-full absolute right-0 p-5 overflow-x-auto transform transition-transform duration-700"
+            <div class="bg-white w-94 h-full absolute right-0 p-5 overflow-x-auto transform transition-transform duration-700"
                 :class="{ 'translate-x-full': !open, 'translate-x-0': open }"
                 x-transition:enter="transform transition ease-in-out duration-700"
                 x-transition:enter-start="translate-x-full"
@@ -57,19 +78,29 @@
                     @endforeach
                 </ul>
 
-                <!-- Brand Filter -->
-                <h2 class="text-2xl font-bold dark:text-gray-400">Brand</h2>
+                <h2 class="text-2xl font-bold dark:text-gray-400">Price Between</h2>
                 <div class="w-16 pb-2 mb-6 border-b border-amber-600 dark:border-gray-400"></div>
-                <ul>
-                    @foreach ($brands as $brand)
-                    <li class="mb-4" wire:key="{{$brand->id}}">
-                        <label for="{{$brand->slug}}" class="flex items-center dark:text-gray-300">
-                            <input type="checkbox" wire:model.live="selected_brands" id="{{$brand->slug}}" value="{{$brand->id}}" class="w-4 h-4 mr-2">
-                            <span class="text-lg dark:text-gray-400">{{$brand->name}}</span>
-                        </label>
-                    </li>
-                    @endforeach
-                </ul>
+                <div>
+                    <div>{{Number::currency($price_range, 'IDR')}}</div>
+                    <input type="range" wire:model.live="price_range" class="w-full h-1 mb-4 bg-blue-100 rounded appearance-none cursor-pointer" max="{{$highest_price}}" value="0" step="50000">
+                    <div class="flex justify-between ">
+                        <span class="inline-block text-xs font-bold text-amber-600">{{Number::currency(10000, 'IDR')}}</span>
+                        <span class="inline-block text-xs font-bold text-amber-600">-</span>
+                        <span class="inline-block text-xs font-bold text-amber-600">{{Number::currency($highest_price, 'IDR')}}</span>
+                    </div>
+                </div>
+
+                <h2 class="text-2xl font-bold dark:text-gray-400 mt-10">Nicotin Between</h2>
+                <div class="w-16 pb-2 mb-6 border-b border-amber-600 dark:border-gray-400"></div>
+                <div>
+                    <div>{{$nicotine_range}}</div>
+                    <input type="range" wire:model.live="nicotine_range" class="w-full h-1 mb-4 bg-blue-100 rounded appearance-none cursor-pointer" max="{{$highest_nicotine}}" value="0" step="1">
+                    <div class="flex justify-between ">
+                        <span class="inline-block text-xs font-bold text-amber-600">1</span>
+                        <span class="inline-block text-xs font-bold text-amber-600">-</span>
+                        <span class="inline-block text-xs font-bold text-amber-600">{{$highest_nicotine}}</span>
+                    </div>
+                </div>
             </div>
         </div>
         <!-- card -->
@@ -89,15 +120,20 @@
                 @foreach ($products as $product)
                 <div class="w-full mx-auto bg-white rounded-lg overflow-hidden shadow-md" wire:key="{{$product->id}}">
                     <div class="relative">
-                        <img class="w-full h-48 object-cover" src="{{url('storage', $product->images[0])}}" alt="{{$product->slug}}">
+                        <img class="w-full h-48 object-cover" src="{{url('uploads', $product->images[0])}}" alt="{{$product->slug}}">
                     </div>
                     <div class="w-full bg-gradient-to-r from-amber-500 to-lime-400 text-sm py-1 px-4 font-semibold rounded-ee-full text-white shadow-md">Ready</div>
                     <div class="p-4">
                         <h2 class="text-xl font-semibold text-gray-800">{{$product->name}}</h2>
                         <p class="text-gray-600 text-sm opacity-65">{{$product->description}}</p>
+                        @if($product->nicotine !== null)
+                        <span class="px-3 text-xs font-bold text-white bg-amber-600 rounded-full">
+                            Nicotine {{ $product->nicotine }}
+                        </span>
+                        @endif
                         <p class="text-gray-600 font-semibold">{{Number::currency($product->price, 'IDR')}}</p>
                         <div class="mt-4">
-                            <a href="https://wa.me/6285772428162?text=Halo,%20saya%20tertarik%20dengan%20produk%20ini:%0A%0A*Judul:*%20{{$product->name}}%0A*Deskripsi:*%20{{$product->description}}%0A%0A{{url('storage', $product->images[0])}}"
+                            <a href="https://wa.me/6281219435587?text=Halo,%20saya%20tertarik%20dengan%20produk%20ini:%0A%0A*Nama Produk:*%20{{$product->name}}%0A*Deskripsi:*%20{{$product->description}}%0A*Nikotin:*%20{{$product->nicotine}}%0A*No SKU:*%20{{$product->no_sku}}%0A%0A{{url('uploads', $product->images[0])}}"
                                 target="_blank"
                                 class="px-4 py-2 bg-gray-800 text-white text-sm font-semibold rounded hover:bg-gray-700 transition duration-700">
                                 Buy Now

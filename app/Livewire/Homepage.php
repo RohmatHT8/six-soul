@@ -22,6 +22,21 @@ class Homepage extends Component
     #[Url]
     public $searchTerm = '';
 
+    #[Url]
+    public $price_range = 0;
+    #[Url]
+    public $nicotine_range = 0;
+
+    #[Url]
+    public $highest_price = 0;
+    #[Url]
+    public $highest_nicotine = 0;
+
+    public function mount() {
+        $this->highest_price = Product::max('price');
+        $this->highest_nicotine = Product::max('nicotine');
+    }
+
     public function render()
     {
         $productQuery = Product::query()->where("is_active", 1);
@@ -38,6 +53,13 @@ class Homepage extends Component
 
         if (!empty($this->searchTerm)) {
             $productQuery->where("name", 'like', '%' . $this->searchTerm . '%');
+        }
+
+        if($this->price_range) {
+            $productQuery->whereBetween('price',[0,$this->price_range]);
+        }
+        if($this->nicotine_range) {
+            $productQuery->whereBetween('nicotine',[0,$this->nicotine_range]);
         }
         
         return view('livewire.homepage', [

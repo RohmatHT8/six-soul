@@ -40,9 +40,11 @@ class ProductResource extends Resource
             ->schema([
                 Group::make()->schema([
                     Section::make('Product Information')->schema([
-                        TextInput::make('name')
+                        TextInput::make('no_sku')
+                            ->label('No Sku')
                             ->required()
                             ->maxLength(255)
+                            ->unique(Product::class, 'no_sku', ignoreRecord: true)
                             ->live(onBlur: true)
                             ->afterStateUpdated(function (string  $operation, $state, Set $set) {
                                 if ($operation !== 'create') {
@@ -57,8 +59,8 @@ class ProductResource extends Resource
                             ->disabled()
                             ->dehydrated()
                             ->unique(Product::class, 'slug', ignoreRecord: true),
-                        TextInput::make('no_sku')
-                            ->label('No Sku')
+
+                        TextInput::make('name')
                             ->required()
                             ->maxLength(255)
                             ->columnSpanFull(),
@@ -95,6 +97,8 @@ class ProductResource extends Resource
                             ->searchable()
                             ->preload()
                             ->relationship('brand', 'name'),
+                        TextInput::make('nicotine')
+                            ->numeric()
                     ]),
                     Section::make('Status')->schema([
                         Toggle::make('is_active')

@@ -17,6 +17,7 @@ class Product extends Model
         'images',
         'description',
         'price',
+        'nicotine',
         'is_active',
     ];
 
